@@ -1,5 +1,5 @@
 # kcp-server & shadowsocks-libev for Dockerfile
-FROM alpine:latest
+FROM alpine:3.4
 MAINTAINER cnDocker
 
 ENV SS_URL=https://github.com/shadowsocks/shadowsocks-libev/archive/v2.5.6.tar.gz \
@@ -11,7 +11,7 @@ ENV SS_URL=https://github.com/shadowsocks/shadowsocks-libev/archive/v2.5.6.tar.g
 
 RUN set -ex && \
     apk add --no-cache pcre bash && \
-    apk add --no-cache  --virtual TMP autoconf build-base wget curl tar libtool linux-headers openssl-dev pcre-dev && \
+    apk add --no-cache  --virtual TMP autoconf build-base wget curl tar libtool linux-headers zlib-dev openssl-dev pcre-dev && \
     curl -sSL $SS_URL | tar xz && \
     cd $SS_DIR && \
     ./configure --disable-documentation && \
@@ -29,8 +29,8 @@ RUN set -ex && \
     wget https://raw.githubusercontent.com/clangcn/kcp-server/master/socks5_latest/socks5_linux_amd64 -O ${KCPTUN_DIR}/socks5 && \
     kcptun_latest_release=`curl -s ${kcptun_latest} | cut -d\" -f2` && \
     kcptun_latest_download=`curl -s ${kcptun_latest} | cut -d\" -f2 | sed 's/tag/download/'` && \
-    kcptun_latest_filename=`curl -s ${kcptun_latest_release} | sed -n '/<strong>kcptun-linux-amd64/p' | cut -d">" -f2 | cut -d "<" -f1` && \
-    wget ${kcptun_latest_download}/${kcptun_latest_filename} -O ${KCPTUN_DIR}/${kcptun_latest_filename} && \
+    kcptun_latest_filename=kcptun-linux-amd64-20190924.tar.gz && \
+    wget https://github.com/xtaci/kcptun/releases/download/v20190924/kcptun-linux-amd64-20190924.tar.gz -O ${KCPTUN_DIR}/${kcptun_latest_filename} && \
     tar xzf ${KCPTUN_DIR}/${kcptun_latest_filename} -C ${KCPTUN_DIR}/ && \
     mv ${KCPTUN_DIR}/server_linux_amd64 ${KCPTUN_DIR}/kcp-server && \
     rm -f ${KCPTUN_DIR}/client_linux_amd64 ${KCPTUN_DIR}/${kcptun_latest_filename} && \
