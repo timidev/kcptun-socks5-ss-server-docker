@@ -9,11 +9,11 @@ set -e
 KCPTUN_CONF="/usr/local/conf/kcptun_server_config.json"
 V2RAY_CONF="/usr/local/conf/v2ray_server_config.json"
 # ======= V2RAY CONFIG ======
-V2RAY_PORT=${V2RAY_PORT:-300}      
+V2RAY_PORT=${V2RAY_PORT:-301}      
 V2RAY_ID=${V2RAY_ID:-f8fd62f9-236e-4c9b-9cd4-5133cbea3d52}      
 V2RAY_ALTERID=${V2RAY_ALTERID:-64}
 # ======= KCPTUN CONFIG ======
-KCPTUN_LISTEN=${KCPTUN_LISTEN:-301}                         #"listen": ":301",
+KCPTUN_LISTEN=${KCPTUN_LISTEN:-300}                         #"listen": ":301",
 KCPTUN_KEY=${KCPTUN_KEY:-bovi123}                            
 KCPTUN_CRYPT=${KCPTUN_CRYPT:-aes-192}                             #"crypt": "aes",
 KCPTUN_MODE=${KCPTUN_MODE:-fast3}                             #"mode": "fast2",
@@ -21,7 +21,7 @@ KCPTUN_MTU=${KCPTUN_MTU:-1000}                                #"mtu": 1350,
 KCPTUN_SNDWND=${KCPTUN_SNDWND:-4096}                          #"sndwnd": 1024,
 KCPTUN_RCVWND=${KCPTUN_RCVWND:-1024}                          #"rcvwnd": 1024,
 KCPTUN_NOCOMP=${KCPTUN_NOCOMP:-false}                         #"nocomp": false
-
+mkdir -p /usr/local/conf/
 [ ! -f ${V2RAY_CONF} ] && cat > ${V2RAY_CONF}<<-EOF
 {
 "log": {
@@ -114,12 +114,12 @@ echo ""
 echo "Starting v2ray..."
 nohup v2ray -config ${V2RAY_CONF}  >/dev/null 2>&1 &
 sleep 0.5
-echo "v2ray (pid `pidof v2ray`)is running."
-netstat -ntlup | grep v2ray
-echo "Starting Kcptun for v2ray..."
-server_linux_amd64 -c ${KCPTUN_CONF}  
+echo "v2ray is running."
+echo "alterId: ${V2RAY_ALTERID}"
+echo "id: ${V2RAY_ID}"
 
-echo "Kcptun for v2ray (pid `pidof server_linux_amd64`)is running."
-netstat -ntlup | grep server_linux_amd64
+echo "Starting Kcptun for v2ray..."
+exec server_linux_amd64 -c ${KCPTUN_CONF}  
+
     
 

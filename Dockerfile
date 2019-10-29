@@ -14,19 +14,18 @@ RUN set -ex && \
     mkdir -p ${V2RAY_DIR} && \
     mkdir -p ${KCPTUN_DIR} && \
     cd ${V2RAY_DIR} && \    
-    wget ${V2RAY_URL}  && \
-    unzip v2ray-linux-64.zip
+    wget --no-check-certificate ${V2RAY_URL}  && \
+    unzip v2ray-linux-64.zip && \
     chown root:root ${V2RAY_DIR}/* && \
     chmod 755 ${V2RAY_DIR}/* && \
     ln -s ${V2RAY_DIR}/* /bin/ && \
     cd ${KCPTUN_DIR} && \    
-    wget ${KCPTUN_URL} && \
+    wget --no-check-certificate ${KCPTUN_URL} && \
     tar -xf kcptun-linux-amd64-20190924.tar.gz && \
     rm -f ${KCPTUN_DIR}/client_linux_amd64  && \
     chown root:root ${KCPTUN_DIR}/* && \
     chmod 755 ${KCPTUN_DIR}/* && \
     ln -s ${KCPTUN_DIR}/* /bin/ && \
-    apk --no-cache del --virtual TMP && \    
     rm -rf /var/cache/apk/* ~/.cache 
 
 ADD entrypoint.sh /entrypoint.sh
