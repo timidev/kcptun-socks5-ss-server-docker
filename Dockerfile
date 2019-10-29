@@ -1,45 +1,33 @@
-# kcp-server & shadowsocks-libev for Dockerfile
+# kcp-server & v2ray for Dockerfile
 FROM alpine:3.4
-MAINTAINER cnDocker
+MAINTAINER timidev
 
-ENV SS_URL=https://github.com/shadowsocks/shadowsocks-libev/archive/v2.5.6.tar.gz \
-    SS_DIR=shadowsocks-libev-2.5.6 \
-    libsodium_latest="https://github.com/jedisct1/libsodium/releases/download/1.0.11/libsodium-1.0.11.tar.gz" \
+ENV V2RAY_URL=https://github.com/v2ray/v2ray-core/releases/download/v4.21.3/v2ray-linux-64.zip \
+    V2RAY_DIR=/usr/local/v2ray \
     CONF_DIR="/usr/local/conf" \
-    kcptun_latest="https://github.com/xtaci/kcptun/releases/latest" \
+    KCPTUN_URL="https://github.com/xtaci/kcptun/releases/download/v20190924/kcptun-linux-amd64-20190924.tar.gz" \
     KCPTUN_DIR=/usr/local/kcp-server
 
 RUN set -ex && \
     apk add --no-cache pcre bash && \
-    apk add --no-cache  --virtual TMP autoconf build-base wget curl tar libtool linux-headers zlib-dev openssl-dev pcre-dev && \
-    curl -sSL $SS_URL | tar xz && \
-    cd $SS_DIR && \
-    ./configure --disable-documentation && \
-    make install && \
-    cd .. && \
-    rm -rf $SS_DIR && \
-    mkdir /tmp/libsodium && \
-    curl -Lk ${libsodium_latest}|tar xz -C /tmp/libsodium --strip-components=1 && \
-    cd /tmp/libsodium && \
-    ./configure && \
-    make -j $(awk '/processor/{i++}END{print i}' /proc/cpuinfo) && \
-    make install && \
-    [ ! -d ${CONF_DIR} ] && mkdir -p ${CONF_DIR} && \
-    [ ! -d ${KCPTUN_DIR} ] && mkdir -p ${KCPTUN_DIR} && cd ${KCPTUN_DIR} && \
-    wget https://raw.githubusercontent.com/clangcn/kcp-server/master/socks5_latest/socks5_linux_amd64 -O ${KCPTUN_DIR}/socks5 && \
-    kcptun_latest_release=`curl -s ${kcptun_latest} | cut -d\" -f2` && \
-    kcptun_latest_download=`curl -s ${kcptun_latest} | cut -d\" -f2 | sed 's/tag/download/'` && \
-    kcptun_latest_filename=kcptun-linux-amd64-20190924.tar.gz && \
-    wget https://github.com/xtaci/kcptun/releases/download/v20190924/kcptun-linux-amd64-20190924.tar.gz -O ${KCPTUN_DIR}/${kcptun_latest_filename} && \
-    tar xzf ${KCPTUN_DIR}/${kcptun_latest_filename} -C ${KCPTUN_DIR}/ && \
-    mv ${KCPTUN_DIR}/server_linux_amd64 ${KCPTUN_DIR}/kcp-server && \
-    rm -f ${KCPTUN_DIR}/client_linux_amd64 ${KCPTUN_DIR}/${kcptun_latest_filename} && \
+    apk add --no-cache  wget tar zlib-dev && \
+    mkdir -p ${V2RAY_DIR} && \
+    mkdir -p ${KCPTUN_DIR} && \
+    cd ${V2RAY_DIR} && \    
+    wget ${V2RAY_URL}  && \
+    unzip v2ray-linux-64.zip
+    chown root:root ${V2RAY_DIR}/* && \
+    chmod 755 ${V2RAY_DIR}/* && \
+    ln -s ${V2RAY_DIR}/* /bin/ && \
+    cd ${KCPTUN_DIR} && \    
+    wget ${KCPTUN_URL} && \
+    tar -xf kcptun-linux-amd64-20190924.tar.gz && \
+    rm -f ${KCPTUN_DIR}/client_linux_amd64  && \
     chown root:root ${KCPTUN_DIR}/* && \
     chmod 755 ${KCPTUN_DIR}/* && \
     ln -s ${KCPTUN_DIR}/* /bin/ && \
-    apk --no-cache del --virtual TMP && \
-    apk --no-cache del build-base autoconf && \
-    rm -rf /var/cache/apk/* ~/.cache /tmp/libsodium
+    apk --no-cache del --virtual TMP && \    
+    rm -rf /var/cache/apk/* ~/.cache 
 
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
