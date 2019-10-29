@@ -24,11 +24,6 @@ KCPTUN_NOCOMP=${KCPTUN_NOCOMP:-false}                         #"nocomp": false
 mkdir -p /usr/local/conf/
 [ ! -f ${V2RAY_CONF} ] && cat > ${V2RAY_CONF}<<-EOF
 {
-"log": {
-    "access": "/etc/v2ray/log/access.log",
-    "error": "/etc/v2ray/log/error.log",
-    "loglevel": "error"
-  },
     "inbounds": [
       {
         "port": ${V2RAY_PORT},
@@ -41,39 +36,7 @@ mkdir -p /usr/local/conf/
             }
           ]
         }      
-      },
-      {
-        "port": 301, // Vmess 协议服务器监听端口
-        "protocol": "vmess",
-        "settings": {
-          "clients": [
-            {
-              "alterId": ${V2RAY_ALTERID},
-              "id": "${V2RAY_ID}"
-            }
-          ]
-        },
-        "streamSettings": {
-          "network": "mkcp", //此处的 mkcp 也可写成 kcp，两种写法是起同样的效果
-          "kcpSettings": {
-            "uplinkCapacity": 5,
-            "downlinkCapacity": 100,
-            "congestion": true,
-            "header": {
-              "type": "none"
-            }
-          }
-        }
-      },
-      {
-        "port": 302, // SS 协议服务端监听端口
-        "protocol": "shadowsocks",
-        "settings": {
-          "method": "aes-128-gcm", // 加密方式
-          "password": "bovi123" //密码
-        }
-      }
-    ],
+      }],
     "outbounds": [
         {
             "protocol": "freedom",
@@ -112,6 +75,7 @@ echo ""
 
 
 echo "Starting v2ray..."
+#exec v2ray -config ${V2RAY_CONF}
 nohup v2ray -config ${V2RAY_CONF}  >/dev/null 2>&1 &
 sleep 0.5
 echo "v2ray is running."
